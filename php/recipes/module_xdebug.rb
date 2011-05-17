@@ -1,7 +1,7 @@
 #
-# Author::  Dustin Currie (<dustin@onlinedesert.com.com>)
+# Author::  Dustin Currie (<dustin@onlinedesert.com>)
 # Cookbook Name:: php
-# Recipe:: module_gd
+# Recipe:: module_xdebug
 #
 # Copyright 2010, Dustin Currie
 #
@@ -18,21 +18,17 @@
 # limitations under the License.
 #
 
-pack = value_for_platform(
-  [ "centos", "redhat", "fedora", "suse" ] => {
-    "default" => "php-xdebug"
-  },
-  "default" => "php5-xdebug"
-)
+# Use pecl to install xdebug.
+php_pear "xdebug" do
+  action :upgrade
+end
 
+# need to dynamically add config b/c of php 5.3 xdebug incompatibility
+# http://www.eclipse.org/forums/index.php?t=msg&goto=538019&
 template value_for_platform([ "centos", "redhat", "fedora", "suse" ] => {"default" => "/etc/xdebug.ini"}, "default" => "/etc/php5/apache2/conf.d/xdebug.ini") do
   source "xdebug.ini.erb"
   owner "root"
   group "root"
   mode 0644
   notifies :restart, resources("service[apache2]"), :delayed
-end
-
-package pack do
-  action :upgrade
 end
